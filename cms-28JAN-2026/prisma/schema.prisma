@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ROLE {
+  ADMIN
+  USER
+}
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role ROLE
+  createdAt DateTime @default(now())
+  courses Course[]
+  enrollments Enrollment[]
+  subscriptions Subscription[]
+}
+
+model Course  {
+  id String @id @default(uuid())
+  title String
+  description String
+  amount Int
+  Admin User? @relation(fields: [adminId],references: [id])
+  adminId String?
+  Lectures Lecture[]
+  enrollments Enrollment[]
+  subscriptions Subscription[]
+}
+
+model Lecture {
+  id String @id @default(uuid())
+  title String
+  videoUrl String
+  courseId String
+  Course Course @relation(fields: [courseId],references: [id])
+  order Int
+}
+
+model Enrollment {
+  id String @id @default(uuid())
+  userId String
+  User User @relation(fields: [userId],references: [id])
+  courseId String
+  Course Course @relation(fields: [courseId],references: [id])
+  enrolledAt DateTime @default(now())
+  @@unique([userId,courseId])  
+}
+
+enum STATUS {
+  SUCCESS
+  FAILED
+}
+model Subscription {
+  id String @id @default(uuid())
+  userId String
+  User User @relation(fields: [userId],references: [id])
+  courseId String
+  Course Course @relation(fields: [courseId],references: [id])
+  amount Int
+  status STATUS
+  createdAt DateTime @default(now())
+  
+}
