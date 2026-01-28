@@ -40,7 +40,6 @@ export const verifyToken = (token: string) => {
 export const checkCourse_AdminExist = async (
   adminId: string,
   res: Response,
-  courseId: string,
 ) => {
   const checkAdmin = await prisma.course.findFirst({
     where: {
@@ -50,17 +49,6 @@ export const checkCourse_AdminExist = async (
   if (!checkAdmin) {
     return res.status(404).json({
       message: "Not course admin",
-    });
-  }
-
-  const course = await prisma.course.findFirst({
-    where: {
-      id: courseId,
-    },
-  });
-  if (!course) {
-    return res.status(404).json({
-      message: "Course not found",
     });
   }
 };

@@ -131,7 +131,8 @@ export const getCourse = async (req: Request, res: Response) => {
 
 export const lesson = async (req: Request, res: Response) => {
   const courseId = req.params.courseId as string;
-  await checkCourse_AdminExist((req as AuthRequest).id, res, courseId);
+  await checkCourse(res, courseId);
+  await checkCourse_AdminExist((req as AuthRequest).id, res);
   const { success, data } = Lesson.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
@@ -179,8 +180,8 @@ export const getLesson = async (req: Request, res: Response) => {
 
 export const Purchase = async (req: Request, res: Response) => {
   const courseId = req.params.courseId as string;
-  await checkEnrollment(res,courseId,(req as AuthRequest).id);
-  await checkCourse(res,courseId);
+  await checkEnrollment(res, courseId, (req as AuthRequest).id);
+  await checkCourse(res, courseId);
   const { success, data } = subscribe.safeParse(req.body);
   if (!success) {
     return res.status(400).json({
@@ -228,3 +229,37 @@ export const Purchase = async (req: Request, res: Response) => {
     res.send("Error Occured !");
   }
 };
+
+export const getEnroll = async (req: Request, res: Response) => {
+  const getEnroll = await prisma.enrollment.findMany({
+    where: {
+      userId: (req as AuthRequest).id,
+    },
+    include: {
+      Course: {
+        select: {
+          title: true,
+        },
+      },
+    },
+    omit: {
+      userId: true,
+      id: true,
+    },
+  });
+  res.send(getEnroll);
+};
+
+
+export const getSubscriptions= async (req: Request, res: Response) =>{
+  const subs= await prisma.subscription.findMany({
+    where :{
+       userId: (req as AuthRequest).id,
+    },omit: {
+      id: true,
+      userId :true
+    }
+  })
+
+  res.status(200).json(subs);
+}
